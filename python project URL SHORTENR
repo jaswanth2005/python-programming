@@ -1,0 +1,69 @@
+import random
+import string
+import tkinter as tk
+from tkinter import Entry, Label, Button
+
+class URLShortener:
+    def __init__(self):
+        self.url_mapping = {}
+
+    def generate_short_key(self):
+        characters = string.ascii_letters + string.digits
+        short_key = ''.join(random.choice(characters) for i in range(6))
+        return short_key
+
+    def shorten_url(self, original_url):
+        if original_url in self.url_mapping.values():
+            # If the original URL is already in the mapping, return its corresponding short URL
+            short_key = next(key for key, url in self.url_mapping.items() if url == original_url)
+        else:
+            # Generate a new short key
+            short_key = self.generate_short_key()
+
+            # Save the mapping
+            self.url_mapping[short_key] = original_url
+
+        return f"http://short.url/{short_key}"
+
+    def redirect(self, short_url):
+        short_key = short_url.split("/")[-1]
+        original_url = self.url_mapping.get(short_key, "URL not found.")
+        return original_url
+
+class URLShortenerGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("URL Shortener")
+
+        self.url_shortener = URLShortener()
+
+        self.label = Label(self.master, text="Enter URL:")
+        self.label.pack()
+
+        self.entry = Entry(self.master)
+        self.entry.pack()
+
+        self.shorten_button = Button(self.master, text="Shorten URL", command=self.shorten_url)
+        self.shorten_button.pack()
+
+        self.redirect_button = Button(self.master, text="Redirect URL", command=self.redirect_url)
+        self.redirect_button.pack()
+
+        self.result_label = Label(self.master, text="")
+        self.result_label.pack()
+
+    def shorten_url(self):
+        original_url = self.entry.get()
+        short_url = self.url_shortener.shorten_url(original_url)
+        self.result_label.config(text=f"Shortened URL: {short_url}")
+
+    def redirect_url(self):
+        short_url = self.entry.get()
+        original_url = self.url_shortener.redirect(short_url)
+        self.result_label.config(text=f"Redirected URL: {original_url}")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = URLShortenerGUI(root)
+    root.mainloop()
+  
